@@ -1,4 +1,4 @@
-package main
+package day01
 
 import (
 	"fmt"
@@ -9,14 +9,6 @@ import (
 
 	"github.com/TiesB/aoc2024-go/utils"
 )
-
-func diff(a, b int) int {
-	if a > b {
-		return a - b
-	}
-
-	return b - a
-}
 
 func ReadInput() (list1 []int, list2 []int) {
 	fs := utils.ScanInput(1)
@@ -45,7 +37,7 @@ func SolvePart1() int {
 	sum := 0
 
 	for i, v1 := range list1 {
-		sum += diff(v1, list2[i])
+		sum += utils.DiffInt(v1, list2[i])
 	}
 
 	return sum
@@ -73,7 +65,7 @@ func SolvePart2() int {
 	return result
 }
 
-func main() {
+func Run() {
 	fmt.Println("Day 01")
 
 	start := time.Now()
