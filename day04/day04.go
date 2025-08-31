@@ -21,7 +21,7 @@ func ReadInput() (lines []string) {
 }
 
 func SolvePart1() (result int) {
-	var g grid.Grid = ReadInput()
+	g := grid.FromStringSlice(ReadInput())
 
 	for pos, r := range g.Items() {
 		if r == 'X' {
@@ -44,7 +44,7 @@ func SolvePart1() (result int) {
 }
 
 func SolvePart2() (result int) {
-	var g grid.Grid = ReadInput()
+	g := grid.FromStringSlice(ReadInput())
 
 	for pos, startOne := range g.Items() {
 		if startOne == 'M' || startOne == 'S' {

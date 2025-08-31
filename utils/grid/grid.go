@@ -5,7 +5,7 @@ import (
 	"iter"
 )
 
-type Grid []string
+type Grid[T any] [][]T
 
 type PositionDiff struct {
 	DX, DY int
@@ -39,7 +39,7 @@ var directionDiff = map[Direction]PositionDiff{
 	NorthWest: {-1, -1},
 }
 
-func (g *Grid) Dimensions() (int, int, error) {
+func (g *Grid[T]) Dimensions() (int, int, error) {
 	if g == nil {
 		return -1, -1, errors.New("grid is nil")
 	}
@@ -47,7 +47,7 @@ func (g *Grid) Dimensions() (int, int, error) {
 	return len((*g)[0]), len(*g), nil
 }
 
-func (g *Grid) Positions() iter.Seq[Position] {
+func (g *Grid[T]) Positions() iter.Seq[Position] {
 	return func(yield func(Position) bool) {
 		height, width, err := g.Dimensions()
 
@@ -65,8 +65,8 @@ func (g *Grid) Positions() iter.Seq[Position] {
 	}
 }
 
-func (g *Grid) Items() iter.Seq2[Position, rune] {
-	return func(yield func(Position, rune) bool) {
+func (g *Grid[T]) Items() iter.Seq2[Position, T] {
+	return func(yield func(Position, T) bool) {
 		for position := range g.Positions() {
 			if item, err := g.At(position); err != nil || !yield(position, item) {
 				return
@@ -75,28 +75,28 @@ func (g *Grid) Items() iter.Seq2[Position, rune] {
 	}
 }
 
-func (g *Grid) At(p Position) (rune, error) {
+func (g *Grid[T]) At(p Position) (T, error) {
 	if p.X < 0 || p.Y < 0 {
-		return 0, errors.New("grid does not support negative indices")
+		return *new(T), errors.New("grid does not support negative indices")
 	}
 
 	if height, width, err := g.Dimensions(); err != nil || height <= p.Y || width <= p.X {
 		if err != nil {
-			return 0, err
+			return *new(T), err
 		}
 
-		return 0, errors.New("grid is too small")
+		return *new(T), errors.New("grid is too small")
 	}
 
-	return rune((*g)[p.Y][p.X]), nil
+	return (*g)[p.Y][p.X], nil
 }
 
-func (g *Grid) Neighbour(pos Position, dir Direction) (rune, error) {
+func (g *Grid[T]) Neighbour(pos Position, dir Direction) (T, error) {
 	return g.At(pos.Transform(dir))
 }
 
-func (g *Grid) NeighboursInDirection(pos Position, dir Direction, n int) ([]rune, error) {
-	var result []rune
+func (g *Grid[T]) NeighboursInDirection(pos Position, dir Direction, n int) ([]T, error) {
+	var result []T
 
 	for i := 0; i < n; i++ {
 		pos = pos.Transform(dir)
@@ -110,4 +110,12 @@ func (g *Grid) NeighboursInDirection(pos Position, dir Direction, n int) ([]rune
 	}
 
 	return result, nil
+}
+
+func FromStringSlice(input []string) (g Grid[rune]) {
+	for _, line := range input {
+		g = append(g, []rune(line))
+	}
+
+	return
 }
