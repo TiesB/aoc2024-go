@@ -2,6 +2,7 @@ package grid
 
 import (
 	"errors"
+	"iter"
 )
 
 type Grid []string
@@ -44,6 +45,34 @@ func (g *Grid) Dimensions() (int, int, error) {
 	}
 
 	return len((*g)[0]), len(*g), nil
+}
+
+func (g *Grid) Positions() iter.Seq[Position] {
+	return func(yield func(Position) bool) {
+		height, width, err := g.Dimensions()
+
+		if err != nil {
+			return
+		}
+
+		for y := 0; y < height; y++ {
+			for x := 0; x < width; x++ {
+				if !yield(Position{X: x, Y: y}) {
+					return
+				}
+			}
+		}
+	}
+}
+
+func (g *Grid) Items() iter.Seq2[Position, rune] {
+	return func(yield func(Position, rune) bool) {
+		for position := range g.Positions() {
+			if item, err := g.At(position); err != nil || !yield(position, item) {
+				return
+			}
+		}
+	}
 }
 
 func (g *Grid) At(p Position) (rune, error) {

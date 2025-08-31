@@ -23,20 +23,18 @@ func ReadInput() (lines []string) {
 func SolvePart1() (result int) {
 	var g grid.Grid = ReadInput()
 
-	for y, row := range g {
-		for x, r := range row {
-			if r == 'X' {
-				for _, dir := range grid.Directions {
+	for pos, r := range g.Items() {
+		if r == 'X' {
+			for _, dir := range grid.Directions {
 
-					neighbours, err := g.NeighboursInDirection(grid.Position{X: x, Y: y}, dir, 3)
+				neighbours, err := g.NeighboursInDirection(pos, dir, 3)
 
-					if err != nil {
-						continue
-					}
+				if err != nil {
+					continue
+				}
 
-					if neighbours[0] == 'M' && neighbours[1] == 'A' && neighbours[2] == 'S' {
-						result += 1
-					}
+				if neighbours[0] == 'M' && neighbours[1] == 'A' && neighbours[2] == 'S' {
+					result += 1
 				}
 			}
 		}
@@ -48,30 +46,26 @@ func SolvePart1() (result int) {
 func SolvePart2() (result int) {
 	var g grid.Grid = ReadInput()
 
-	for y, row := range g {
-		for x, startOne := range row {
-			if startOne == 'M' || startOne == 'S' {
-				pos := grid.Position{x, y}
-
-				if n, err := g.At(pos.Transform(grid.SouthEast)); err != nil || n != 'A' {
-					continue
-				}
-
-				startTwo, err := g.At(pos.TransformScaled(grid.South, 2))
-				if err != nil || !(startTwo == 'M' || startTwo == 'S') {
-					continue
-				}
-
-				if n, err := g.At(pos.TransformScaled(grid.SouthEast, 2)); err != nil || !((startOne == 'S' && n == 'M') || (startOne == 'M' && n == 'S')) {
-					continue
-				}
-
-				if n, err := g.At(pos.TransformScaled(grid.East, 2)); err != nil || !((startTwo == 'S' && n == 'M') || (startTwo == 'M' && n == 'S')) {
-					continue
-				}
-
-				result += 1
+	for pos, startOne := range g.Items() {
+		if startOne == 'M' || startOne == 'S' {
+			if n, err := g.At(pos.Transform(grid.SouthEast)); err != nil || n != 'A' {
+				continue
 			}
+
+			startTwo, err := g.At(pos.TransformScaled(grid.South, 2))
+			if err != nil || !(startTwo == 'M' || startTwo == 'S') {
+				continue
+			}
+
+			if n, err := g.At(pos.TransformScaled(grid.SouthEast, 2)); err != nil || !((startOne == 'S' && n == 'M') || (startOne == 'M' && n == 'S')) {
+				continue
+			}
+
+			if n, err := g.At(pos.TransformScaled(grid.East, 2)); err != nil || !((startTwo == 'S' && n == 'M') || (startTwo == 'M' && n == 'S')) {
+				continue
+			}
+
+			result += 1
 		}
 	}
 
